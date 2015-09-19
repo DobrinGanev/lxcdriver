@@ -1,0 +1,28 @@
+{
+	"name": "lxcdriver",
+	"description": "Linux Container - LXC commands wrapper ",
+	"version": "0.0.1",
+	"author": "Suresh Kumar",	
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/sureshkvl/lxcdriver.git"
+	},
+	"keywords": ["lxc", "linux", "container","virtualization"],
+	"dependencies": {	
+	},
+	"devDependencies": {
+		"coffee-script": ">=1.9"
+	},
+	"config":{
+		"debianpackages":["lxc"]	
+	},
+	"main": "./lib/lxc",
+	"license": "MIT",
+	"homepage": "http://kaanalnet.org",
+	"scripts": {		
+		"start": "nodejs lib/lxc.js"		
+	},
+	"contributors": [
+		""	
+	]
+}
