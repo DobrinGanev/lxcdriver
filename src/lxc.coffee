@@ -97,7 +97,7 @@ class LXC
 				callback "running"	
 
 	appendFile :(filename,text)->
-		return callback new Error "Called in Wrond time"  unless @state is "created"
+		return new Error "Called in Wrond time"  unless @state is "created" or @state is "cloned"
 		path = "/var/lib/lxc/#{@name}/rootfs"
 		filename = path + filename
 		util.log "appendFile ..filename is ", filename
@@ -106,7 +106,7 @@ class LXC
 
 	writeFile :(filename,text)->
 		#write the contents in to the contents
-		return callback new Error "Called in Wrond time"  unless @state is "created"
+		return new Error "Called in Wrond time"  unless @state is "created" or @state is "cloned"
 		path = "/var/lib/lxc/#{@name}/rootfs"
 		filename = path + filename
 		util.log "writeFile ..filename is ", filename
@@ -114,7 +114,7 @@ class LXC
 		return true
 
 	deleteFile :(filename)->	
-		return callback new Error "Called in Wrond time"  unless @state is "created"
+		return  new Error "Called in Wrond time"  unless @state is "created" or @state is "cloned"
 		path = "/var/lib/lxc/#{@name}/rootfs"
 		filename = path + filename
 		util.log "deleteFile ..filename is ", filename				
@@ -122,7 +122,7 @@ class LXC
 		return true	
 	
 	addEthernetInterface: (vethname, hwAddress) ->
-		return callback new Error "Called in Wrond time"  unless @state is "created"
+		return  new Error "Called in Wrond time"  unless @state is "created" or @state is "cloned"
 		#update the lxc container config file
 		util.log " addEthernetInterface #{@name}  vethname #{vethname}  hwAddress #{hwAddress} "
 		filename = "/var/lib/lxc/#{@name}/config"
@@ -133,7 +133,7 @@ class LXC
 
 
 	updateIPaddress: (ifname, ipaddress, netmask, gateway) ->
-		return callback new Error "Called in Wrond time"  unless @state is "created"
+		return  new Error "Called in Wrond time"  unless @state is "created" or @state is "cloned"
 		filename= "/var/lib/lxc/#{@name}/rootfs/etc/network/interfaces"			
 		text = "\nauto #{ifname}\niface #{ifname} inet static \n\t address #{ipaddress} \n\t netmask #{netmask} \n\t gateway #{gateway}\n" if gateway?
 		text = "\nauto #{ifname}\niface #{ifname} inet static \n\t address #{ipaddress} \n\t netmask #{netmask} \n" unless gateway?
@@ -141,14 +141,14 @@ class LXC
 		return true
 
 	clearInterfaceFile:()->
-		return callback new Error "Called in Wrond time"  unless @state is "created"
+		return  new Error "Called in Wrond time"  unless @state is "created" or @state is "cloned"
 		filename= "/var/lib/lxc/#{@name}/rootfs/etc/network/interfaces"
 		fs.unlinkSync filename
 		return true
 
 
 	updateHostStartupScript: ()->
-		return callback new Error "Called in Wrond time"  unless @state is "created"
+		return  new Error "Called in Wrond time"  unless @state is "created"
 		filename= "/var/lib/lxc/#{@name}/rootfs/etc/init.d/rc.local"
 		agentcmd = "\nnodejs /node_modules/testagent/lib/app.js > /var/log/testagent.log & \n"
 		iperf1 = "iperf -s > /var/log/iperf_tcp_server.log & \n"
@@ -158,7 +158,7 @@ class LXC
 		fs.appendFileSync(filename,iperf2)
 
 	updateRouterConfig : (ifmap, containerName)->
-		return callback new Error "Called in Wrond time"  unless @state is "created"
+		return  new Error "Called in Wrond time"  unless @state is "created"
 		zebrafile = "/var/lib/lxc/#{@name}/rootfs/etc/zebra.conf"
 		ospffile = "/var/lib/lxc/#{@name}/rootfs/etc/ospf.conf"
 		zebraconf = "hostname zebra \npassword zebra \nenable password zebra \n"
@@ -176,7 +176,7 @@ class LXC
 		fs.appendFileSync(ospffile,ospfconf)
 
 	updateRouterStartupScript : ()->
-		return callback new Error "Called in Wrond time"  unless @state is "created"
+		return  new Error "Called in Wrond time"  unless @state is "created"
 		util.log "in updateRouterStartupScript "
 		filename= "/var/lib/lxc/#{@name}/rootfs/etc/init.d/rc.local"
 		zebracmd = "\n/usr/lib/quagga/zebra -f /etc/zebra.conf -d & \n"
