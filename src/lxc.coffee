@@ -6,9 +6,9 @@ execute = (command, callback) ->
     callback new Error "command not given" unless command?
     util.log "executing #{command}..."        
     exec command, (error, stdout, stderr) =>
-        #util.log "lxcdriver: execute - Error : " + error if error?
-        #util.log "lxcdriver: execute - stdout : " + stdout if stdout?        
-        #util.log "lxcdriver: execute - stderr : " + stderr if stderr?
+        util.log "lxcdriver: execute - Error : " + error if error?
+        util.log "lxcdriver: execute - stdout : " + stdout if stdout?        
+        util.log "lxcdriver: execute - stderr : " + stderr if stderr?
         if error
             callback error
         else
@@ -130,62 +130,6 @@ class LXC
 		text = "\nlxc.network.type = veth \nlxc.network.hwaddr= #{hwAddress} \nlxc.network.veth.pair = #{vethname} \nlxc.network.flags = up"
 		fs.appendFileSync(filename,text)
 		return true
-
-
-	updateIPaddress: (ifname, ipaddress, netmask, gateway) ->
-		return  new Error "Called in Wrond time"  unless @state is "created" or @state is "cloned"
-		filename= "/var/lib/lxc/#{@name}/rootfs/etc/network/interfaces"			
-		text = "\nauto #{ifname}\niface #{ifname} inet static \n\t address #{ipaddress} \n\t netmask #{netmask} \n\t gateway #{gateway}\n" if gateway?
-		text = "\nauto #{ifname}\niface #{ifname} inet static \n\t address #{ipaddress} \n\t netmask #{netmask} \n" unless gateway?
-		fs.appendFileSync(filename,text)
-		return true
-
-	clearInterfaceFile:()->
-		return  new Error "Called in Wrond time"  unless @state is "created" or @state is "cloned"
-		filename= "/var/lib/lxc/#{@name}/rootfs/etc/network/interfaces"
-		fs.unlinkSync filename
-		return true
-
-
-	updateHostStartupScript: ()->
-		return  new Error "Called in Wrond time"  unless @state is "created"
-		filename= "/var/lib/lxc/#{@name}/rootfs/etc/init.d/rc.local"
-		agentcmd = "\nnodejs /node_modules/testagent/lib/app.js > /var/log/testagent.log & \n"
-		iperf1 = "iperf -s > /var/log/iperf_tcp_server.log & \n"
-		iperf2 = "iperf -s -u > /var/log/iperf_udp_server.log & \n"
-		fs.appendFileSync(filename,agentcmd)
-		fs.appendFileSync(filename,iperf1)
-		fs.appendFileSync(filename,iperf2)
-
-	updateRouterConfig : (ifmap, containerName)->
-		return  new Error "Called in Wrond time"  unless @state is "created"
-		zebrafile = "/var/lib/lxc/#{@name}/rootfs/etc/zebra.conf"
-		ospffile = "/var/lib/lxc/#{@name}/rootfs/etc/ospf.conf"
-		zebraconf = "hostname zebra \npassword zebra \nenable password zebra \n"
-		for i in ifmap
-			zebraconf += "interface  #{i.ifname} \n"			
-			zebraconf += "   ip address #{i.ipaddress}/30 \n" if i.type is "wan"
-			zebraconf += "   ip address #{i.ipaddress}/27 \n" if i.type is "lan"
-			zebraconf += "   ip address #{i.ipaddress}/24 \n" if i.type is "mgmt"		
-		util.log "zebrafile " +  zebraconf
-		fs.appendFileSync(zebrafile,zebraconf)
-		ospfconf = "hostname ospf \npassword zebra \nenable password zebra \nrouter ospf\n  "
-		for i in ifmap
-			ospfconf += "   network #{i.ipaddress}/24 area 0 \n" unless i.type is "mgmt"
-		util.log "ospfd fils",ospfconf
-		fs.appendFileSync(ospffile,ospfconf)
-
-	updateRouterStartupScript : ()->
-		return  new Error "Called in Wrond time"  unless @state is "created"
-		util.log "in updateRouterStartupScript "
-		filename= "/var/lib/lxc/#{@name}/rootfs/etc/init.d/rc.local"
-		zebracmd = "\n/usr/lib/quagga/zebra -f /etc/zebra.conf -d & \n"
-		ospfcmd = "/usr/lib/quagga/ospfd -f /etc/ospf.conf -d & \n"
-		util.log "zebracmd " + zebracmd
-		util.log "ospfdcmd " + ospfcmd
-		fs.appendFileSync(filename,zebracmd)
-		fs.appendFileSync(filename,ospfcmd)
-		return
 
 	destructor : ()->
 		@stop (result)=>
