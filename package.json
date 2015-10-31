@@ -1,7 +1,7 @@
 {
 	"name": "lxcdriver",
 	"description": "Linux Container - LXC commands wrapper ",
-	"version": "0.0.1",
+	"version": "0.0.3",
 	"author": "Suresh Kumar",	
 	"repository": {
 		"type": "git",
